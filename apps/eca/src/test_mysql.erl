@@ -1,4 +1,4 @@
-%%% @author  <>
+%%% @author  <yunnet>
 %%% @copyright (C) 2016, 
 %%% @doc
 %%%
@@ -50,8 +50,6 @@ b()->
         {error, Reason}->
             io:format("connect is failed:~p~n", [Reason])
     end,
-
-
     io:format("==========b finish==========").
 
 

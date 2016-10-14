@@ -1,5 +1,5 @@
 -module(eca_tcp_fsm).
--author('yunnet@gmail.com').
+-author("yunnet").
 
 -behaviour(gen_fsm).
 -include("eca_proto.hrl").
