@@ -1,7 +1,7 @@
-eca[![Build Status](https://travis-ci.org/yunnet/eca.svg?branch=master)](https://travis-ci.org/yunnet/eca)
+## eca [![Build Status](https://travis-ci.org/yunnet/eca.svg?branch=master)](https://travis-ci.org/yunnet/eca)
 =====
 
-An OTP application
+**An OTP application
 
 ##终端数据采集程序。
 * 程序通过配置的侦听端口，终端连接此端口，上传原始数据；
