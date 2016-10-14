@@ -18,6 +18,9 @@
 -export([add/1, delete/1, find/1]).
 
 -define(SERVER, ?MODULE).
+-define(ETS_TERMINAL, terminalinfo).
+
+
 -include("eca_commno.hrl").
 
 -record(state, {}).
@@ -61,7 +64,7 @@ find(Key)->
 %%--------------------------------------------------------------------
 init([]) ->
     process_flag(trap_exit, true),
-    ets:new(terminalinfo, [public,
+    ets:new(?ETS_TERMINAL, [public,
 			                      ordered_set,
 		                        named_table,
 			                     {keypos, #terminalInfo.commno}
@@ -83,11 +86,11 @@ init([]) ->
 %% @end
 %%--------------------------------------------------------------------
 handle_call({add, Terminal}, _From, State) ->
-    ets:insert(terminalinfo, Terminal),
+    ets:insert(?ETS_TERMINAL, Terminal),
     Reply = ok,
     {reply, Reply, State};
 handle_call({delete, Key}, _From, State) ->
-    ets:delete(terminalinfo, Key),
+    ets:delete(?ETS_TERMINAL, Key),
     Reply = ok,
     {reply, Reply, State};
 handle_call({find, Key}, _From, State) ->
@@ -149,17 +152,17 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 getinfo([])->    
-    case ets:first(terminalinfo) of
-	'$end_of_table'->
-	    [];
-	Key->
-	    ets:lookup(terminalinfo, Key)
+    case ets:first(?ETS_TERMINAL) of
+      '$end_of_table'->
+          [];
+      Key->
+        ets:lookup(?ETS_TERMINAL, Key)
     end;
 getinfo(Key)->	
-    case ets:next(terminalinfo, Key) of
-	'$end_of_table'->
-	    [];
-	Next->
-	    ets:lookup(terminalinfo, Next)
+    case ets:next(?ETS_TERMINAL, Key) of
+      '$end_of_table'->
+          [];
+      Next->
+          ets:lookup(?ETS_TERMINAL, Next)
     end.
 
