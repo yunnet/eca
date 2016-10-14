@@ -1,2 +1,2 @@
 #!/bin/sh
-erl -pa ebin -boot start_sasl -config sys -Q65535
+rebar3 shell
