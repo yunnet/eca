@@ -4,6 +4,7 @@ otp_release:
   - 18.1
   - 18.0
 before_script:
+    - chmod +x *
     - "./bootstrap_travis.sh"
 script: "./rebar3 eunit"
 
