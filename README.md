@@ -9,10 +9,7 @@ eca [![Build Status](https://travis-ci.org/yunnet/eca.svg?branch=master)](https:
 * 通过标识号码，匹配数据库的终端类型后，做进一步数据分析；
 * 将数据写入到kafka.
 
-
 ##Build
------
-
     $ rebar3 compile
 
 ##monitor
