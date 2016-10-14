@@ -1,4 +1,4 @@
-## eca [![Build Status](https://travis-ci.org/yunnet/eca.svg?branch=master)](https://travis-ci.org/yunnet/eca)
+eca [![Build Status](https://travis-ci.org/yunnet/eca.svg?branch=master)](https://travis-ci.org/yunnet/eca)
 =====
 
 **An OTP application
