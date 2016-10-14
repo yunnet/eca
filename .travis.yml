@@ -3,5 +3,7 @@ otp_release:
   - 18.2.1
   - 18.1
   - 18.0
-script:
-  - rebar compile && rebar skip_deps=true eunit
+before_script:
+    - "./bootstrap_travis.sh"
+script: "./rebar3 eunit"
+
