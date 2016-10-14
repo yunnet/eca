@@ -1,0 +1,17 @@
+{application, eca,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, [eca_tcp_listener, eca_sup, eca_tcp_sup, eca_process_sup, eca_process_child, eca_send_sup]},
+  {mod, { eca_app, []}},
+  {applications,
+   [kernel,
+    sasl,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
