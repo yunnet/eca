@@ -7,7 +7,7 @@
 %%% Created : 11. 十月 2016 17:31
 %%%-------------------------------------------------------------------
 -module(eca_sender).
--author("Net").
+-author("yunnet").
 
 -behaviour(gen_server).
 -include("eca_proto.hrl").

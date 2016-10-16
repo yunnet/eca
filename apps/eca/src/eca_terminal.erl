@@ -64,10 +64,12 @@ find(Key)->
 %%--------------------------------------------------------------------
 init([]) ->
     process_flag(trap_exit, true),
-    ets:new(?ETS_TERMINAL, [public,
-			                      ordered_set,
+    ets:new(?ETS_TERMINAL, [{keypos, #terminalInfo.commno},
 		                        named_table,
-			                     {keypos, #terminalInfo.commno}
+			                      ordered_set,
+                            public,
+                            ?ETSRC,
+                            ?ETSWC
 		                        ]),
     {ok, #state{}}.
 
