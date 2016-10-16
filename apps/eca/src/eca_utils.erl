@@ -8,21 +8,42 @@
 %%%-------------------------------------------------------------------
 -module(eca_utils).
 
--export([checksum/1]).
--export([getChannal_keys/1]).
--export([md5/1]).
--export([to_bin/1]).
--export([to_hex/1]).
--export([to_hex_upper/1]).
+-compile(export_all).
 
--export([binary_search/2]).
--export([sys_info/0]).
+%% @doc get IP address string from Socket
+ip(Socket) ->
+  {ok, {IP, _Port}} = inet:peername(Socket),
+  {Ip0, Ip1, Ip2, Ip3} = IP,
+  list_to_binary(integer_to_list(Ip0) ++ "." ++ integer_to_list(Ip1) ++ "." ++ integer_to_list(Ip2) ++ "." ++ integer_to_list(Ip3)).
 
--export([now2utc/0]).
--export([time2GB/1, time2utc/1, datetime2utc/1]).
+%% time format
+one_to_two(One) -> io_lib:format("~2..0B", [One]).
+
+time_format(Now) ->
+  {{Y, M, D}, {H, MM, S}} = calendar:now_to_local_time(Now),
+  lists:concat([Y, "-", one_to_two(M), "-", one_to_two(D), " ",
+    one_to_two(H), ":", one_to_two(MM), ":", one_to_two(S)]).
+date_format(Now) ->
+  {{Y, M, D}, {_H, _MM, _S}} = calendar:now_to_local_time(Now),
+  lists:concat([Y, "-", one_to_two(M), "-", one_to_two(D)]).
+date_hour_format(Now) ->
+  {{Y, M, D}, {H, _MM, _S}} = calendar:now_to_local_time(Now),
+  lists:concat([Y, "-", one_to_two(M), "-", one_to_two(D), " ", one_to_two(H)]).
+date_hour_minute_format(Now) ->
+  {{Y, M, D}, {H, MM, _S}} = calendar:now_to_local_time(Now),
+  lists:concat([Y, "-", one_to_two(M), "-", one_to_two(D), " ", one_to_two(H), "-", one_to_two(MM)]).
+%% split by -
+minute_second_format(Now) ->
+  {{_Y, _M, _D}, {H, MM, _S}} = calendar:now_to_local_time(Now),
+  lists:concat([one_to_two(H), "-", one_to_two(MM)]).
+
+hour_minute_second_format(Now) ->
+  {{_Y, _M, _D}, {H, MM, S}} = calendar:now_to_local_time(Now),
+  lists:concat([one_to_two(H), ":", one_to_two(MM), ":", one_to_two(S)]).
+
 
 %%累计和
-checksum(X) when is_binary(X)->
+checksum(X) when is_binary(X) ->
   checksum(X, 0).
 checksum(<<H, T/binary>>, Acc) ->
   A = H bxor Acc,
@@ -52,14 +73,14 @@ to_hex(B) ->
 to_hex(<<>>, Acc) ->
   lists:reverse(Acc);
 to_hex(<<C1:4, C2:4, Rest/binary>>, Acc) ->
-to_hex(Rest, [hexdigit(C2), hexdigit(C1) | Acc]).
+  to_hex(Rest, [hexdigit(C2), hexdigit(C1) | Acc]).
 
 to_hex_int(0, Acc) ->
   Acc;
 to_hex_int(I, Acc) ->
   to_hex_int(I bsr 4, [hexdigit(I band 15) | Acc]).
 
-to_hex_upper(I)->
+to_hex_upper(I) ->
   H = to_hex(I),
   string:to_upper(H).
 
@@ -81,23 +102,23 @@ dehex(C) when C >= $A, C =< $F ->
 
 
 %%获取连接Key
-getChannal_keys(_Socket)->
-    {ok, {IP, _Port}} = inet:peername(_Socket),
-    F = integer_to_list(_Port), 
-    case IP of
-	{A, B, C, D} ->
-	    lists:concat(["tcp_", A, "_", B, "_", C, "_", D, "_", F]);	
-	Str when is_list(Str) ->
-	    Str;
-	_ ->
-	    []
-    end.
+getChannal_keys(_Socket) ->
+  {ok, {IP, _Port}} = inet:peername(_Socket),
+  F = integer_to_list(_Port),
+  case IP of
+    {A, B, C, D} ->
+      lists:concat(["tcp_", A, "_", B, "_", C, "_", D, "_", F]);
+    Str when is_list(Str) ->
+      Str;
+    _ ->
+      []
+  end.
 
 
 %% hex ascii md5
 -spec md5(binary()) -> string().
 md5(S) -> string:to_lower(
-	    lists:flatten([io_lib:format("~2.16.0b",[N]) || <<N>> <= erlang:md5(S)])).
+  lists:flatten([io_lib:format("~2.16.0b", [N]) || <<N>> <= erlang:md5(S)])).
 
 binary_search(Tuple, Key) ->
   binary_search(Tuple, Key, 1, size(Tuple)).
@@ -107,9 +128,9 @@ binary_search(Tuple, Key, Low, High) ->
   Mid = (Low + High) div 2,
   M = element(Mid, Tuple),
   if
-    M > Key -> binary_search(Tuple, Key, Low, Mid-1);
-    M < Key -> binary_search(Tuple, Key, Mid+1, High);
-    true    -> Mid
+    M > Key -> binary_search(Tuple, Key, Low, Mid - 1);
+    M < Key -> binary_search(Tuple, Key, Mid + 1, High);
+    true -> Mid
   end.
 
 
@@ -141,13 +162,13 @@ now2utc() ->
 
 time2utc(X) when is_tuple(X) ->
   {A, B, C} = X,
-  erlang:round(A * 1000000000 + B * 1000 + C/1000).
+  erlang:round(A * 1000000000 + B * 1000 + C / 1000).
 
 %%Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT
 datetime2utc(DateTime) ->
   [T] = calendar:local_time_to_universal_time_dst(DateTime),
   (calendar:datetime_to_gregorian_seconds(T) - calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})) * 1000.
 
-time2GB(DateTime)->
+time2GB(DateTime) ->
   {{Y, M, D}, {H, Min, S}} = calendar:now_to_local_time(DateTime),
   lists:flatten(io_lib:format("~2..0w~2..0w~2..0w~2..0w~2..0w~2..0w", [Y rem 100, M, D, H, Min, S])).

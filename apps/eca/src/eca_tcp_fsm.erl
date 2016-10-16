@@ -22,7 +22,7 @@
 ]).
 
 -record(state, {
-  socket,     % client socket
+  socket,            % client socket
   commno,
   terminaltype,
   gathered = <<>>,   % buffer
@@ -76,28 +76,27 @@ init([]) ->
 'WAIT_FOR_SOCKET'({socket_ready, Socket}, State) when is_port(Socket) ->
   % Now we own the socket
   inet:setopts(Socket, [{active, once}, {packet, 0}, binary]),
-
   {ok, {Addr, Port}} = inet:peername(Socket),
-  error_logger:info_msg("terminal: ~p:~p connect ok. \n", [Addr, Port]),
+  error_logger:info_msg("terminal: ~p:~p connect ok. ~n", [Addr, Port]),
+
   {next_state, 'WAIT_FOR_DATA', State#state{socket = Socket, addr = Addr, port = Port}, ?TIMEOUT};
 
 'WAIT_FOR_SOCKET'(Other, State) ->
-  error_logger:error_msg("State: 'WAIT_FOR_SOCKET'. Unexpected message: ~p\n", [Other]),
+  error_logger:error_msg("State: 'WAIT_FOR_SOCKET'. Unexpected message: ~p~n", [Other]),
   %% Allow to receive async messages
   {next_state, 'WAIT_FOR_SOCKET', State}.
 
 %% Notification event coming from client
-%%'WAIT_FOR_DATA'({data, Data}, #state{socket=S} = State) ->
 'WAIT_FOR_DATA'({data, Data}, State) ->
   {ok, NewState} = handle_data({tcp, Data}, State),
   {next_state, 'WAIT_FOR_DATA', NewState, ?TIMEOUT};
 
 'WAIT_FOR_DATA'(timeout, State) ->
-  error_logger:error_msg("~p Client connection timeout - closing.\n", [self()]),
+  error_logger:error_msg("~p Client connection timeout - closing.~n", [self()]),
   {stop, normal, State};
 
 'WAIT_FOR_DATA'(Data, State) ->
-  error_logger:info_msg("~p Ignoring data: ~p\n", [self(), Data]),
+  error_logger:info_msg("~p Ignoring data: ~p~n", [self(), Data]),
   {next_state, 'WAIT_FOR_DATA', State, ?TIMEOUT}.
 
 %%-------------------------------------------------------------------------
@@ -140,7 +139,7 @@ handle_info({tcp, Socket, Bin}, StateName, #state{socket = Socket} = StateData) 
   ?MODULE:StateName({data, Bin}, StateData);
 
 handle_info({tcp_closed, Socket}, _StateName, #state{socket = Socket, addr = Addr, port = Port} = State) ->
-  error_logger:info_msg("~p Client ~p:~p disconnected.\n", [self(), Addr, Port]),
+  error_logger:info_msg("~p Client ~p:~p disconnected.~n", [self(), Addr, Port]),
   {stop, normal, State};
 
 handle_info(_Info, StateName, StateData) ->
@@ -180,7 +179,7 @@ handle_data({tcp, Bin}, #state{gathered = Gathered} = State) ->
   end.
 
 %%
-doRawParse(Bin, N, #state{commno = CommNO, terminaltype = Terminaltype} = State) ->
+doRawParse(Bin, N, #state{commno = CommNO, terminaltype = Terminal_Type} = State) ->
   case eca_code:is_package(N, Bin) of
     {ok, Len1, Len2} ->
       <<_:Len1/binary, C:Len2/binary, Data/binary>> = Bin,
@@ -196,7 +195,7 @@ doRawParse(Bin, N, #state{commno = CommNO, terminaltype = Terminaltype} = State)
 
       NewObj = #objUpRaw{genTime = os:timestamp(),
                           commNO = CommNO,
-                          terminalType = Terminaltype,
+                          terminalType = Terminal_Type,
                           tunnel = 1,
                           dataHex = eca_utils:to_hex_upper(C)
                           },
