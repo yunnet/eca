@@ -57,7 +57,8 @@ query(Args)->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    Options = [{host, "localhost"}, {user, "root"}, {password, "root"}, {database, "etbasedata"}],
+    [Host, Port, User, Password, DB, _] = eca_config:get_mysql_config(eca),
+    Options = [{host, Host}, {port, Port}, {user, User}, {password, Password}, {database, DB}],
     {ok, Pid} = mysql:start_link(Options),
 
     erlang:send_after(10, self(), try_to_connect),
@@ -108,7 +109,7 @@ handle_cast(_Msg, State) ->
 handle_info(try_to_connect, #state{pid = Pid} = State) ->
     {ok, _, Rows} = mysql:query(Pid, <<"select commNO, terminalType from v_terminal_simple">>),
     [addTerminal(X, Y) || [X, Y] <- Rows],
-    error_logger:info_msg("load terminal count: ~p~n", [length(Rows)]),
+    error_logger:info_msg("======load terminal count: ~p======~n", [length(Rows)]),
     {noreply, State}.
 
 addTerminal(_CommNO, _TerminalType)->
