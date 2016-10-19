@@ -16,6 +16,30 @@ ip(Socket) ->
   {Ip0, Ip1, Ip2, Ip3} = IP,
   list_to_binary(integer_to_list(Ip0) ++ "." ++ integer_to_list(Ip1) ++ "." ++ integer_to_list(Ip2) ++ "." ++ integer_to_list(Ip3)).
 
+%%808转义 7E -> 7E02, 7D -> 7D01
+escape808(X) ->
+  escape808(X, <<>>).
+escape808(<<126, T/binary>>, Acc) ->
+  escape808(T, <<Acc/binary, 125, 2>>);   %%7E -> 7D02    126 -> 125, 2
+escape808(<<125, T/binary>>, Acc) ->
+  escape808(T, <<Acc/binary, 125, 1>>);   %%7D -> 7D01    125 -> 125, 1
+escape808(<<H, T/binary>>, Acc) ->
+  escape808(T, <<Acc/binary, H>>);      %%Other
+escape808(<<>>, Acc) ->
+  Acc.
+
+%%808反转义 7D02 -> 7E 7D01 -> 7D
+unEscape808(X) ->
+  unEscape808(X, <<>>).
+unEscape808(<<125, 1, T/binary>>, Acc) ->
+  unEscape808(T, <<Acc/binary, 125>>);      %%7D01 -> 7D     125, 1 -> 125
+unEscape808(<<125, 2, T/binary>>, Acc) ->
+  unEscape808(T, <<Acc/binary, 126>>);      %%7D02 -> 7E     125, 2 -> 126
+unEscape808(<<H, T/binary>>, Acc) ->        %%Other
+  unEscape808(T, <<Acc/binary, H>>);
+unEscape808(<<>>, Acc) ->
+  Acc.
+
 %%累计和
 checksum(X) when is_binary(X) ->
   checksum(X, 0).
