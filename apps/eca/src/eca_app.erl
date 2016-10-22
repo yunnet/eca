@@ -18,10 +18,8 @@ start(_StartType, _StartArgs) ->
   %% load ets
   case eca_terminal:start_link() of
     {ok, Pid} ->
-      io:format(":::::: terminal mgr start ok. ~p~n", [Pid]),
       {ok, Pid};
     Other ->
-      io:format("terminal mgr faild.~p~n", [Other]),
       {error, Other}
   end,
 

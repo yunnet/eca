@@ -58,10 +58,16 @@ query(Args)->
 init([]) ->
     [Host, Port, User, Password, DB, _] = eca_config:get_mysql_config(eca),
     Options = [{host, Host}, {port, Port}, {user, User}, {password, Password}, {database, DB}],
-    {ok, Pid} = mysql:start_link(Options),
+    try
+        {ok, Pid} = mysql:start_link(Options),
+        error_logger:info_msg(":::::: mysql<~p:~p> connect ok. ~p~n", [Host, Port]),
 
-    erlang:send_after(10, self(), try_to_connect),
-    {ok, #state{pid = Pid}}.
+        erlang:send_after(10, self(), try_to_connect),
+        {ok, #state{pid = Pid}}
+    catch
+        _: Reason  -> error_logger:error_msg("mysql connect err: ~p~n", [Reason]),
+        {stop, Reason}
+    end.
 
 %%--------------------------------------------------------------------
 %% @private
